@@ -1,0 +1,140 @@
+{% extends "main.html" %}
+{% block main %}
+<style>
+    .form-floating {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h4>Cadastrar Usuário</h4>
+                </div>
+                <div class="card-body">
+                    <form id="formCadastro" novalidate>
+                        <div class="mb-3">
+                            <label for="nome" class="form-label">Nome</label>
+                            <input type="text" id="nome" class="form-control" placeholder="Digite seu nome">
+                            <span id="erroNome" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="sobrenome" class="form-label">Sobrenome</label>
+                            <input type="text" id="sobrenome" class="form-control" placeholder="Digite seu sobrenome">
+                            <span id="erroSobrenome" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-mail</label>
+                            <input type="email" id="email" class="form-control" placeholder="Digite seu e-mail">
+                            <span id="erroEmail" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="senha" class="form-label">Senha</label>
+                            <input type="password" id="senha" class="form-control" placeholder="Digite uma senha">
+                            <span id="erroSenha" class="text-danger"></span>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="button" id="cadastrar" class="btn btn-outline-success w-100">
+                                <i class="fa-solid fa-user-plus"></i> Cadastrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("cadastrar").addEventListener("click", function () {
+        let nome = document.getElementById("nome").value.trim();
+        let sobrenome = document.getElementById("sobrenome").value.trim();
+        let email = document.getElementById("email").value.trim();
+        let senha = document.getElementById("senha").value.trim();
+
+        let valido = true;
+
+        // Limpa mensagens anteriores
+        document.getElementById("erroNome").innerText = "";
+        document.getElementById("erroSobrenome").innerText = "";
+        document.getElementById("erroEmail").innerText = "";
+        document.getElementById("erroSenha").innerText = "";
+
+        // Validação Nome
+        if (nome === "") {
+            document.getElementById("erroNome").innerText = "Por favor, insira seu nome.";
+            valido = false;
+        } else if (nome.length < 2) {
+            document.getElementById("erroNome").innerText = "O nome deve ter pelo menos 2 caracteres.";
+            valido = false;
+        }
+
+        // Validação Sobrenome
+        if (sobrenome === "") {
+            document.getElementById("erroSobrenome").innerText = "Por favor, insira seu sobrenome.";
+            valido = false;
+        } else if (sobrenome.length < 2) {
+            document.getElementById("erroSobrenome").innerText = "O sobrenome deve ter pelo menos 2 caracteres.";
+            valido = false;
+        }
+
+        // Validação Email
+        let regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email === "") {
+            document.getElementById("erroEmail").innerText = "Por favor, insira seu e-mail.";
+            valido = false;
+        } else if (!regexEmail.test(email)) {
+            document.getElementById("erroEmail").innerText = "Formato de e-mail inválido.";
+            valido = false;
+        } else {
+            // Verifica se o e-mail já existe
+            let usuariosExistentes = JSON.parse(localStorage.getItem("usuarios")) || [];
+            let emailExistente = usuariosExistentes.some(u => u.email.toLowerCase() === email.toLowerCase());
+            if (emailExistente) {
+                document.getElementById("erroEmail").innerText = "Este e-mail já está cadastrado.";
+                valido = false;
+            }
+        }
+
+        // Validação Senha
+        if (senha === "") {
+            document.getElementById("erroSenha").innerText = "Por favor, insira uma senha.";
+            valido = false;
+        } else if (senha.length < 6) {
+            document.getElementById("erroSenha").innerText = "A senha deve ter pelo menos 6 caracteres.";
+            valido = false;
+        } else if (!/[A-Z]/.test(senha) || !/[0-9]/.test(senha)) {
+            document.getElementById("erroSenha").innerText = "A senha deve conter pelo menos 1 letra maiúscula e 1 número.";
+            valido = false;
+        }
+
+        // Se tudo estiver válido
+        if (valido) {
+            let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+            let novoUsuario = {
+                id: usuarios.length ? usuarios[usuarios.length - 1].id + 1 : 1,
+                nome: nome,
+                sobrenome: sobrenome,
+                email: email,
+                senha: senha
+            };
+
+            usuarios.push(novoUsuario);
+            localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+            // Mensagem visual de sucesso
+            alert("Usuário cadastrado com sucesso!");
+            window.location.href = "/usuario/lista"; // redireciona para a página de listagem
+        }
+    });
+</script>
+{% endblock %}
